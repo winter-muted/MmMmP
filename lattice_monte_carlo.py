@@ -28,11 +28,67 @@ def
 
 def attempt_switch():
 	
-	# select random lattice site
+	# select random lattice site (get the indices of the cite in the spin matrix)
+	
+	# calculate the energy of the lattice site
+	
+	e1 = lattice_site_energy()
+	
+	# make a trial switch to the randomely selected spin
+	#spin[i,j] = -spin[i,j] # flip spin
+	# calculate energy of switched spin
+	e2 = lattice_site_energy()
+	
+	# use the metropolis algorithm to determine whether to accept switch or not
+	# calculate change in energy
+	de = e2 - e1
+	
+	if de > 0:
+		r2 = random()
+		if r2 > exp(-de/kT): # reject switch
+			#spin[i,j] = -spin[i,j]
+			
 	
 	return 0;
 
-def lattice_site_energy():
+def lattice_site_energy(i,j):
+	"""
+	function calculates energy of site spin(i,j)
+	"""
 	
+	# get neighbor spin values
+	ie = i + 1		# east
+	iw = i - 1		# west
+	jn = j + 1		# north
+	js = j - 1		# south
 	
-	return 0;
+	# implement periodic boundary conditions
+	if ie > nx-1:
+		ei = 0
+	if ie < 0:
+		ie = nx -1
+	if iw < 0:
+		ew = nx -1
+	#if iw
+	
+	# assign neighbor spins
+	So = spin[i,j]
+	Se = spin[ie,j]
+	Sw = spin[iw,j]
+	Sn = spin[i,jn]
+	Ss = spin[i,js]
+	
+	# Sum neighbor interaction energies
+	
+	Ee = -0.5*JJ*So*Se
+	Ew =
+	En =
+	Es =
+	
+	# External field energy
+	
+	Eo = -HH*So
+	
+	eij = Ee + Ew + En + Es + Eo
+	
+	return eij;

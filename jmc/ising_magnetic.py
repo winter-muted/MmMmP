@@ -51,8 +51,8 @@ def attempt_switch():
 	global nx,ny,spin
 
 	# select random lattice site (get the indices of the cite in the spin matrix)
-	i = int(floor(random()*(nx-1)))
-	j = int(floor(random()*(ny-1)))
+	i = randint(0,nx-1)
+	j = randint(0,ny-1)
 
 	# calculate the energy of the lattice site
 	e1 = lattice_site_energy(i,j)
@@ -89,7 +89,7 @@ def lattice_site_energy(i,j):
 
 	# implement periodic boundary conditions
 	if ie > nx-1:
-		ei = 0
+		ie = 0
 	if iw < 0:
 		iw = nx -1
 	if jn > ny -1:

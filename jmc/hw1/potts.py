@@ -1,4 +1,4 @@
-# ising model for two state magnetic spin system
+# Q-State Potts Model Code
 from numpy import *
 from random import *
 import matplotlib.pyplot as pp
@@ -6,22 +6,17 @@ import matplotlib.cm as cm
 
 def ising(cycles):
 	"""
-	function that runs an ising model simulation for a binary state magnetic
-	spin system.
-
-	INPUTS:
-
-	cycles = the number of monte carlo cycles to run the simulation for
-
-	OUTPUTS:
-
-	magn = a 1-D numpy array with length = cycles that stores the total
-			magnetization of the two-state spin system at the end of each
-			monte-carlo cycle
+	main driver function for the Potts model
 	"""
 
 	# declare global variables
 	global nxy
+
+	# figure counter
+	fcount = 1
+
+	# path to directory that I will save figure files in
+	path = '/home/joseph/Dropbox/graduate_school/fall_2015/multi-scale_materials_modeling/hw1/'
 
 	# run simulation for the given number of monte carlo cycles (one cycle =
 	# nx*ny randome monte carlo switch attempts)
@@ -31,12 +26,24 @@ def ising(cycles):
 		for i in range(nxy):
 			attempt_switch()
 
+		if cyc % 25 == 0:
+			pp.imshow(spin,cmap = cm.terrain)
+
+			if fcount == 1:
+				pp.colorbar()
+				pp.clim = (1,Q)
+
+			pp.title('Cycle '+str(cyc))
+			filename='hw1Cfig'+str(fcount)+'.eps'
+			pp.savefig(path+filename)
+			fcount = fcount + 1
+
 	return 0;
 
 def attempt_switch():
 	'''
-	This function attempts to make a switch for a randomely selected spin using
-	the metropolis algorithm.
+	This function attempts to make a switch for a randomely selected neighbor
+	grain using the metropolis algorithm.
 	'''
 
 	# declare global variables
@@ -49,11 +56,15 @@ def attempt_switch():
 	# calculate the energy of the lattice site
 	e1 = lattice_site_energy(i,j)
 
-	# make a trial switch to the randomely selected spin
-	spin_old = spin[i,j]
-	q_rand = randint(1,Q) 
-	spin[i,j] = q_rand
-	
+	# make a random trial switch to one of the neighbor values
+	spin_old = spin[i,j]			# store current state
+
+	ii,jj = get_rand_neigh(i,j)	# randomely select a neighbor
+	spin_new = spin[ii,jj]
+
+	# make the trail switch
+	spin[i,j] = spin_new
+
 	# calculate energy of switched spin
 	e2 = lattice_site_energy(i,j)
 
@@ -70,7 +81,7 @@ def attempt_switch():
 
 def lattice_site_energy(i,j):
 	"""
-	function calculates energy of site spin(i,j)
+	function calculates energy of site i,j
 	"""
 
 	# declare global variables
@@ -93,12 +104,15 @@ def lattice_site_energy(i,j):
 		js = ny -1
 
 	# assign neighbor spins
+
+	# first nearest neighbors
 	So = spin[i,j]
 	Se = spin[ie,j]
 	Sw = spin[iw,j]
 	Sn = spin[i,jn]
 	Ss = spin[i,js]
-	
+
+	# second nearest neighbors
 	Snw = spin[iw,jn]
 	Sne = spin[ie,jn]
 	Ssw = spin[iw,js]
@@ -109,7 +123,7 @@ def lattice_site_energy(i,j):
 	Ew = -0.5*JJ*(krondelt[So-1,Sw-1] - 1)
 	En = -0.5*JJ*(krondelt[So-1,Sn-1] - 1)
 	Es = -0.5*JJ*(krondelt[So-1,Ss-1] - 1)
-	
+
 	Enw = -0.5*JJ*(krondelt[So-1,Snw-1] - 1)
 	Ene = -0.5*JJ*(krondelt[So-1,Sne-1] - 1)
 	Esw = -0.5*JJ*(krondelt[So-1,Ssw-1] - 1)
@@ -119,6 +133,49 @@ def lattice_site_energy(i,j):
 	eij = Ee + Ew + En + Es + Enw + Ene + Esw + Ese
 
 	return eij;
+
+def get_rand_neigh(i,j):
+	'''
+	This function accepts the indices of a spin and returns a random neighbor
+	from the eight different options.
+	'''
+	rn = randint(1,8)
+	if rn == 1:				# N neighbor
+		ii = i
+		jj = j + 1
+	elif rn == 2:			# NE neighbor
+		ii = i + 1
+		jj = j + 1
+	elif rn == 3:			# E neighbor
+		ii = i + 1
+		jj = j
+	elif rn == 4:			# SE neighbor
+		ii = i + 1
+		jj = j - 1
+	elif rn == 5:			# S neighbor
+		ii = i
+		jj = j - 1
+	elif rn == 6:			# SW neighbor
+		ii = i - 1
+		jj = j - 1
+	elif rn == 7:			# W neighbor
+		ii = i - 1
+		jj = j
+	else:					# NW neighbor
+		ii = i - 1
+		jj = j + 1
+
+	# implement periodic boundary conditions
+	if ii > nx-1:
+		ii = 0
+	if ii < 0:
+		ii = nx -1
+	if jj > ny -1:
+		jj = 0
+	if jj < 0:
+		jj = ny -1
+
+	return ii,jj;
 
 ##############################################################################
 # global variables
@@ -133,7 +190,7 @@ kT = 0.1				# boltzmann's constant times temperature
 seed()					# seed the random number generator
 Q = 10
 
-krondelt = identity(Q)
+krondelt = identity(Q)	# the kronecker delta function in matrix form
 
 # for ising model initialize spin lattice to random distributions
 spin = zeros((nx,ny))
@@ -145,15 +202,20 @@ for j in range(ny):
 # main program
 ###############################################################################
 
-cycles = 50
+# figure counter
+fcount = 1
+
+# path to directory that I will save figure files in
+path = '/home/joseph/Dropbox/graduate_school/fall_2015/multi-scale_materials_modeling/hw1/'
+cycles = 75
 
 ising(cycles)
 
 # plot final state after monte carlo cycles
 pp.imshow(spin,cmap = cm.terrain)
-pp.colorbar()
-pp.caxis = ([0,Q-1])
-pp.show()
+pp.title('Cycle '+str(cycles))
+pp.savefig(path+'hw1Cfig4.eps')
+
 ###############################################################################
 # end program
 ###############################################################################

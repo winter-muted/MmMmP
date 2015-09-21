@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 J = 0.4
-HH = 0.02
-kT = .5
+HH = 0.0
+kT = 1.5
 nx = 50
 ny = 50
 nxy = nx*ny
 
-initial_biasing = .4  # what percentage of particles get assigned spin down at start
+initial_biasing = .5  # what percentage of particles get assigned spin down at start
 ncycles = 500
 
 spin = np.zeros((nx,ny)) #Initalize an nx by ny array to zero

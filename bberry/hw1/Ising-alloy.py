@@ -4,58 +4,52 @@ from random import random as rand
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-J = 0.4
+J = -0.4
 HH = 0.5
-kT = .1
+kT = 1.5
 nx = 50
 ny = 50
 nxy = nx*ny
+xA = 0.3
 
-filename = 'J04-HH5-kT1.png'
-initial_biasing = .5  # what percentage of particles get assigned spin down at start
+nA = xA*nxy
+
+nAo = nA
+
 ncycles = 500
+filename = 'Alloy-A3-kT15-J4neg.png'
 
-spin = np.zeros((nx,ny)) #Initalize an nx by ny array to zero
-magn = []
+spin = np.zeros((nx,ny))
 
+for i in xrange(nx):
+    for j in xrange(ny):
+        if (rand() < xA):
+             spin[i][j] = 1
+        else:
+            spin[i][j] = -1
 
 
 def ising():
-    for i in xrange(nx):
-        for j in xrange(ny):
-            if (rand() < initial_biasing):
-                spin[i][j] = -1
-            else:
-                spin[i][j] = 1
 
-    magn.append(np.sum(spin)/float(nxy))
-
-
-    # plt.imshow(spin,cmap=cm.summer)
-    # plt.colorbar()
-    # plt.clim(-1,1)
-    # plt.title('Typical initial condition for 50/50 starting concentration')
-    # plt.savefig('Initial.png')
-    # plt.clf()
 
     for cycle in xrange(ncycles):
-        magn.append(np.sum(spin)/float(nxy))
         for i in xrange(nxy):
             Attempt_Switch()
+        # print cycle
 
-    # x = range(ncycles+1)
-    # plt.subplot(221)
-    # plt.plot(x,magn)
+    magn = np.sum(spin)/float(nxy)
 
     plt.imshow(spin,cmap=cm.summer)
     plt.colorbar()
     plt.clim(-1,1)
-    plt.title('J=0.4,HH=0.5,kT=0.1')
+    plt.title('Alloyed system, J=-0.4,XA=0.3,kT=1.5')
     plt.savefig(filename)
     plt.clf()
 
+
 def Attempt_Switch():
-    # generate a random int between 0 and nxy
+    global nA
+    # generate a random int between "1" and nxy
     # map the integer into a 2-d index
     # aka pick a random lattice site
     rand1 = np.random.randint(0,nx)
@@ -66,21 +60,20 @@ def Attempt_Switch():
     E1 = Lattice_site_energy(rand1,rand2)
 
     spin[rand1][rand2] = -1*spin[rand1][rand2]
+    nA += spin[rand1][rand2]
 
     E2 = Lattice_site_energy(rand1,rand2)
 
     # Metropolis algo to decide acceptance
 
     dE = E2 - E1 # final - Initial
-    # if (dE < 0):
-    #     print "The change was intrinsic"
 
     if (dE > 0):
         if (np.random.rand() > np.exp(-dE/kT)):
-            # print "Rejected the change!"
+            # reject the change
             spin[rand1][rand2] = -1*spin[rand1][rand2]
-        # else:
-        #     print "the change proc'd!"
+            nA += spin[rand1][rand2]
+
 
 def Lattice_site_energy(x_pos,y_pos):
 
@@ -111,7 +104,8 @@ def Lattice_site_energy(x_pos,y_pos):
 
     # External Field Energy
 
-    Eo = -HH*So
+    # Eo = -HH*So
+    Eo = HH*pow((nA - nAo),2)
     Eij = Ee + Ew + En + Es + Eo
 
     return Eij

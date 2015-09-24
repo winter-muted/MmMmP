@@ -4,18 +4,18 @@ from random import random as rand
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-J = 0.4
-HH = 0.0
-kT = .8
+########## Parameters ###########
+output_list = [100,200,300] # what time steps to output
+ncycles = 500
+Q = 10
 
 nx = 50
 ny = 50
+
+J = 0.4
+kT = 1.5
+########## Initialization ###########
 nxy = nx*ny
-
-ncycles = 500
-Q = 10
-filename = 'potts.png'
-
 spin = np.zeros((nx,ny))
 
 for i in xrange(nx):
@@ -23,31 +23,70 @@ for i in xrange(nx):
         r = rand()
         spin[i][j] = np.random.randint(0,Q)
 
-plt.imshow(spin,cmap=cm.Set3)
-plt.colorbar()
-plt.clim(0,10)
-plt.title('Typical initial condition for 50/50 starting concentration')
-plt.savefig('Potts.png')
-plt.clf()
+#########################################
+
+def Attempt_Switch():
+    # Pick a random site on the domain
+    rand1 = np.random.randint(0,nx)
+    rand2 = np.random.randint(0,ny)
+
+    #  get energy of random site before swap
+    E1 = Lattice_site_energy(rand1,rand2)
 
 
+    # Select a random second nearest neighbor
+    rand3 = periodic(np.random.randint(rand1-2,rand1+3))
+    rand4 = periodic(np.random.randint(rand2-2,rand2+3))
 
-def potts():
-    for cycle in xrange(ncycles):
-        for i in xrange(nxy):
-            Attempt_Switch()
-        # print cycle
+    # Store the old spin and change the spin to that of the neighbor
+    old_spin = spin[rand1][rand2]
+    spin[rand1][rand2] = spin[rand3][rand4]
 
-    magn = np.sum(spin)/float(nxy)
+    E2 = Lattice_site_energy(rand1,rand2)
+    dE = E2 - E1 # final - Initial
 
-    plt.imshow(spin,cmap=cm.Set3)
-    plt.colorbar()
-    plt.clim(0,10)
-    plt.title('Ending state for kT = 0.1')
-    plt.savefig('Potts_final.png')
-    plt.clf()
+    # Decide if we want to keep the change, metropolis style
+    if (dE > 0):
+        if (np.random.rand() > np.exp(-dE/kT)):
+            # reject the change
+            spin[rand1][rand2] = old_spin
+
+# Determine energy of node
+def Lattice_site_energy(x_pos,y_pos):
+
+    ie = periodic(x_pos + 1)
+    iee = periodic(x_pos + 2)
+    iw = periodic(x_pos -1)
+    iww = periodic(x_pos - 2)
+    jn = periodic(y_pos + 1)
+    jnn = periodic(y_pos + 2)
+    js = periodic(y_pos - 1)
+    jss = periodic(y_pos - 2)
+
+    Eij = 0.0
+
+# Neighbors only contribute energy if the spin is different
+    if (spin[x_pos][y_pos] != spin[ie][y_pos]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[iee][y_pos]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[iw][y_pos]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[iww][y_pos]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[x_pos][jn]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[x_pos][jnn]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[x_pos][js]):
+        Eij += .5*J
+    if (spin[x_pos][y_pos] != spin[x_pos][jss]):
+        Eij += .5*J
+
+    return Eij
 
 
+# Fix up indicies to be periodic
 def periodic(index):
     if index == nx:
         return 0
@@ -59,80 +98,29 @@ def periodic(index):
         return (nx -2)
     return index
 
+# Program flow control
+def potts():
+    for cycle in xrange(ncycles):
+        for i in xrange(nxy):
+            Attempt_Switch()
+        if int(cycle) in output_list:
+            my_plot(cycle)
 
 
-def Attempt_Switch():
-    # generate a random int between "1" and nxy
-    # map the integer into a 2-d index
-    # aka pick a random lattice site
-    rand1 = np.random.randint(0,nx)
-    rand2 = np.random.randint(0,ny)
+# Custom Plotting function
+def my_plot(cycle):
+    title = 'Time Step ' + str(cycle)
+    filename = 'Potts' + str(cycle) + '_high'
+    plt.imshow(spin,cmap=cm.Paired)
+    plt.colorbar()
+    plt.clim(0,10)
+    plt.title(title)
+    plt.savefig(filename)
+    plt.clf()
 
-
-    #  get energy of random site before and after swap
-    E1 = Lattice_site_energy(rand1,rand2)
-
-    # Select a random second nearest neighbor
-    rand3 = np.random.randint(rand1-2,rand1+2)
-    rand4 = np.random.randint(rand2-2,rand2+2)
-
-    rand3 = periodic(rand3)
-    rand4 = periodic(rand4)
-
-    E2 = Lattice_site_energy(rand3,rand4)
-
-
-
-    dE = E2 - E1 # final - Initial
-
-    if (dE > 0):
-        if (np.random.rand() > np.exp(-dE/kT)):
-            # reject the change
-            spin[rand1][rand2] = -1*spin[rand1][rand2]
-
-
-def Lattice_site_energy(x_pos,y_pos):
-    index_list = ['ie','iee','iw','iww','jn','jnn','js','jss']
-    ie = x_pos + 1
-    iee = x_pos + 2
-    iw = x_pos - 1
-    iww = x_pos - 2
-    jn = y_pos + 1
-    jnn = y_pos + 2
-    js = y_pos - 1
-    jss = y_pos - 1
-
-    ie = periodic(ie)
-    iee = periodic(iee)
-    iw = periodic(iw)
-    iww = periodic(iww)
-    jn = periodic(jn)
-    jnn = periodic(jnn)
-    js = periodic(js)
-    jss = periodic(jss)
-
-
-    So = spin[x_pos][y_pos]
-    Se = spin[ie][y_pos] + spin[iee][y_pos]
-    Sw = spin[iw][y_pos] + spin[iww][y_pos]
-    Sn = spin[x_pos][jn] + spin[x_pos][jnn]
-    Ss = spin[x_pos][js] + spin[x_pos][jss]
-
-    Ee = -.5*J*So*Se
-    Ew = -.5*J*So*Sw
-    En = -.5*J*So*Sn
-    Es = -.5*J*So*Ss
-
-    # External Field Energy
-
-    Eo = -HH*So
-    Eij = Ee + Ew + En + Es + Eo
-
-    return Eij
-
-
-
+# Boilerplate
 def main():
+    my_plot(0)
     potts()
 
 

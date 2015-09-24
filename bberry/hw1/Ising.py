@@ -30,22 +30,11 @@ def ising():
 
     magn.append(np.sum(spin)/float(nxy))
 
-
-    # plt.imshow(spin,cmap=cm.summer)
-    # plt.colorbar()
-    # plt.clim(-1,1)
-    # plt.title('Typical initial condition for 50/50 starting concentration')
-    # plt.savefig('Initial.png')
-    # plt.clf()
-
     for cycle in xrange(ncycles):
         magn.append(np.sum(spin)/float(nxy))
         for i in xrange(nxy):
             Attempt_Switch()
 
-    # x = range(ncycles+1)
-    # plt.subplot(221)
-    # plt.plot(x,magn)
 
     plt.imshow(spin,cmap=cm.summer)
     plt.colorbar()
@@ -55,9 +44,6 @@ def ising():
     plt.clf()
 
 def Attempt_Switch():
-    # generate a random int between 0 and nxy
-    # map the integer into a 2-d index
-    # aka pick a random lattice site
     rand1 = np.random.randint(0,nx)
     rand2 = np.random.randint(0,ny)
 
@@ -72,15 +58,11 @@ def Attempt_Switch():
     # Metropolis algo to decide acceptance
 
     dE = E2 - E1 # final - Initial
-    # if (dE < 0):
-    #     print "The change was intrinsic"
 
     if (dE > 0):
         if (np.random.rand() > np.exp(-dE/kT)):
-            # print "Rejected the change!"
             spin[rand1][rand2] = -1*spin[rand1][rand2]
-        # else:
-        #     print "the change proc'd!"
+
 
 def Lattice_site_energy(x_pos,y_pos):
 

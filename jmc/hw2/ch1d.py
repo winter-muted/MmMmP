@@ -12,7 +12,7 @@ dt = 0.01				# must be ~ 1/dx^4
 M = 1.0					# 
 nx = 51					# number of points
 nstr = 0.15				# noise strength
-nsteps = 100000			# 
+nsteps = 1			# 
 skip = 1000				# 
 
 # arrays

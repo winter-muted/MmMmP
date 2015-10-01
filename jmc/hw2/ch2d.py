@@ -15,22 +15,26 @@ nx = 256				# number of points in x
 ny = 256				# number of points in y
 nxy = nx*ny				# total number of points
 nstr = 0.15				# noise strength
-nsteps = 500			# 
-skip = 50				# 
+nsteps = 1			# 
+skip = 10				# 
 
 # arrays
-c = zeros(nx,ny)		# concentration array
+c = zeros((nx,ny))		# concentration array
 
-kx1 = mod( 1/2 + (0:(nx-1))/nx,1) -1/2
-kx = =kx1*(2*pi/dx)
+kx1 = mod( 1/2 + arange(float(nx))/nx,1) -1/2
+kx = kx1*(2*pi/dx)
 
-ky1 = mod( 1/2 + (0:(ny-1))/ny,1) -1/2
+ky1 = mod( 1/2 + arange(float(ny))/ny,1) -1/2
 ky = ky1*(2*pi/dy)
 
 KX,KY = meshgrid(kx,ky)
 
-k2 = multiply(KX,KX) + multiply(KY,KY)
-k4 = multiply(k2,k2)
+#print KX
+#print
+#print KY
+#print
+k2 = KX*KX + KY*KY
+k4 = k2*k2
 
 #################################################
 #			initializations of c				#
@@ -40,6 +44,12 @@ k4 = multiply(k2,k2)
 noise = random.uniform(-nstr,nstr,(nx,ny))
 c = c + noise
 
+# plot inititial condition
+#plt.imshow(c)
+#plt.colorbar()
+#plt.clim(-1,1)
+#plt.show()
+
 # step function
 
 #################################################
@@ -48,19 +58,26 @@ c = c + noise
 
 for step in range(nsteps):
 	
-	# update the CH solution
+	# calculate df in real space
 	df = c*c*c - c
-	df_fft = fft2(df)/nxy
-	c_fft = fft2(c)/nxy
 	
+	# get the fft of df and c
+	df_fft = fft.fft2(df)/nxy
+	c_fft = fft.fft2(c)/nxy
+	
+	# update the CH solution
 	c_fft = (c_fft - dt*M*k2*df_fft)/(1.0 + dt*K*M*k4) # figure out how to do element wise division
-	c = ifft2(c_fft)*nxy
+	
+	# transform c_fft back to real space to get c again
+	c = real(fft.ifft2(c_fft))*nxy
+	
+	print c
 	
 	# plot c
 	
-	#if step == 1 or step % skip == 0:
+	#if step % skip == 0:
 		
-		
+
 # plot final step
 plt.imshow(c)
 plt.colorbar()

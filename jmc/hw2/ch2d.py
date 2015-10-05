@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 #################################################
-#				global variables			    #
+#	global variables			#
 #################################################
 
 # scalar parameters
@@ -78,7 +78,7 @@ for step in range(nsteps):
     # calculate df in real space
     df = c*c*c - c
 
-    # get the fft of df and c
+    # get the fft of df 
     df_fft = fft.fft2(df)/nxy
     c_fft = fft.fft2(c)/nxy
 

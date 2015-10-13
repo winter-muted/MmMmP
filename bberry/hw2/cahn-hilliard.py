@@ -57,7 +57,7 @@ def CH_run():
 
 # Plotting routines
 def my_plot():
-    pass
+
 
 # Boilerplate
 def main():

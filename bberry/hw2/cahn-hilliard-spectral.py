@@ -2,6 +2,7 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 # Do some global defines and initialization
@@ -17,8 +18,8 @@ M = 1.0
 nx = 256
 ny = 256
 nxy = nx*ny
-nsteps = 500
-plot_interval = 100
+nsteps = 15000
+plot_interval = 1000
 
 c = 0.0 + 0.01*(np.random.rand(nx,ny) - 0.5)
 # f1 = plt.figure(1)
@@ -64,23 +65,34 @@ def CH_run():
         update_CH()
         # plot on the given interval
         if (step == 0) or (step % plot_interval == 0):
-            run(data)
-    ani = animation.FuncAnimation(fig, run, data_gen, blit=True, interval=10,
-        repeat=False)
+    #         run(data)
+    # ani = animation.FuncAnimation(fig, run, data_gen, blit=True, interval=10,
+    #     repeat=False)
+            my_plot(step)
 
 def run(data):
+    pass
 
 
 # Plotting routines
-def my_plot():
+def my_plot(step):
+    filename = 'chs-step' + str(step) + '.png'
     plt.imshow(c)
     plt.colorbar()
     plt.clim(-1,1)
-    plt.show()
+    plt.savefig(filename)
+    plt.clf()
 
 # Boilerplate
 def main():
     CH_run()
+    # Make an animation and cleanup the results
+    # Currently has a problem. There should be a more pythonic way of doing
+    # the animation.
+    os.system('rm chs-animation.gif')
+    os.system('convert -delay 100 -loop 0 chs-step* chs-animation.gif')
+    os.system('rm chs-step*')
+
 
 if __name__ == "__main__":
     main()

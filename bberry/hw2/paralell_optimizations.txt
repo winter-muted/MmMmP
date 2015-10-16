@@ -1,0 +1,29 @@
+sequential
+
+run1
+
+real	1m11.161s
+user	1m6.957s
+sys	0m6.387s
+
+run2
+
+real	1m1.000s
+user	0m58.497s
+sys	0m3.540s
+
+
+------
+multithreaded
+
+run1
+
+real	0m28.978s
+user	0m59.407s
+sys	0m6.737s
+
+run2
+
+real	0m28.765s
+user	0m58.600s
+sys	0m6.853s

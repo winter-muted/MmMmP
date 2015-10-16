@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
-import thread
+from multiprocessing import Process
 import copy
 
 
@@ -21,7 +21,7 @@ M = 1.0
 nx = 256
 ny = 256
 nxy = nx*ny
-nsteps = 1500
+nsteps = 200
 plot_interval = 10
 
 c = np.full(nxy,0.5)
@@ -93,15 +93,20 @@ def CH_run():
         if (step == 0) or (step % plot_interval == 0):
             total_c.append(sum(sum(c)))
 
+            # my_plot(c,step)
             try:
                 c_plot = copy.copy(c)
                 # c_plot = c
-                thread.start_new_thread ( my_plot, (c_plot,step) )
+                thread = Process(target=my_plot,args=(c_plot,step))
+                thread.start()
+
                 # my_plot(step)
             except:
                 print "Could not create plot thread."
 
+
             domain_size()
+
 
 # Plotting routines
 def my_plot(c_plot,step):
@@ -120,7 +125,7 @@ def main():
     # the animation.
     os.system('rm chs-animation.gif')
     os.system('convert -delay 100 -loop 0 chs-step* chs-animation.gif')
-    # os.system('rm chs-step*')
+    os.system('rm chs-step*')
 
     # L(t) plot code
     def fit_func(x,A,n):

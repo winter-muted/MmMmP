@@ -113,7 +113,7 @@ def my_plot(c_plot,step):
     filename = 'chs-step' + str(step) + '.png'
     plt.imshow(c_plot)
     plt.colorbar()
-    plt.clim(-1,1)
+    plt.clim(0,1)
     plt.savefig(filename)
     plt.clf()
 

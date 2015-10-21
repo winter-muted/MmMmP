@@ -21,10 +21,10 @@ M = 1.0
 nx = 256
 ny = 256
 nxy = nx*ny
-nsteps = 200
-plot_interval = 10
+nsteps = 15000
+plot_interval = 1000
 
-c = np.full(nxy,0.5)
+c = np.full(nxy,0.25)
 for i in range(nxy):
     a = np.random.rand()
     if a < .5:
@@ -124,8 +124,8 @@ def main():
     # Currently has a problem. There should be a more pythonic way of doing
     # the animation.
     os.system('rm chs-animation.gif')
-    os.system('convert -delay 100 -loop 0 chs-step* chs-animation.gif')
-    os.system('rm chs-step*')
+    # os.system('convert -delay 100 -loop 0 chs-step* chs-animation.gif')
+    # os.system('rm chs-step*')
 
     # L(t) plot code
     def fit_func(x,A,n):

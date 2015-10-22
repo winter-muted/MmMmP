@@ -1,0 +1,164 @@
+
+
+\documentclass{report}
+
+\usepackage{graphicx, subfigure}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage{listings}
+
+\lstset{frame=tb,
+    language=Python,
+    basicstyle={\small\ttfamily},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=3
+}
+
+
+
+\begin{document}
+
+    \title{Phase Field Simulations}
+    \author{Bruce Berry}
+    \maketitle
+
+    \section{Introduction}
+    This report details the implementation of phase field techniques for phase seperation and grain growth of a material.  In part A, phase seperation is accomplished via solution of the Cahn-Hilliard equation for a conserved concentration variable.  In part B, the Allen-Cahn equation evolves non-conserved phase variables representing grains in a material.
+
+    \section{Background}
+    For the purpose of the report, Phase field techniques encompass two equations to evolve conserved and non-convserved variables, respectively.  Solution can be done using a variety of techniques: in this case, spectral methods were utilized to take advantage of the problem's periodicity and large time step tolerance.
+
+    \subsection{Cahn-Hilliard}
+    The Cahn-Hilliard equation evolves a conserved variable, such as concentration (c).  Mass transfer is driven by the minimization of the free energy of the system, defined by a free energy functional F.
+
+    \begin{equation} \label{cahn-hilliard}
+        \frac{\partial c}{\partial t} = \nabla \cdot M\nabla (f^{'}_{0} - 2K\nabla^{2}c)
+        % E = \frac{-J}{2} \sum_{i} \sum_{j\ne i} S_i S_j - H \sum_{i} S_i
+    \end{equation}
+    In \eqref{cahn-hilliard} , the free energy functional includes the homogeneous free energy, or mixing energy, and the interfacial energy.  Part A uses the following functional dependence for f, having the shape of a double-well potential.
+
+    \begin{equation} \label{f-function}
+        f_0 = \frac{c^4}{4} - \frac{c^2}{2}
+    \end{equation}
+
+
+    \subsection{Allen-Cahn}
+    The Allen-Cahn equation evolves non-conserved order parameters in time.
+
+    \begin{equation} \label{allen-cahn}
+        \frac{\partial \phi}{\partial t} = -L(f^{'}_{0}(\phi) - \kappa \nabla^{2}\phi)
+    \end{equation}
+
+    The free energy of the system takes the form:
+
+    \begin{equation} \label{free}
+        f_{0}(\phi,T) = (\frac{1}{4}\phi^{4} - \frac{1}{2}\phi^{2}) + A(\phi - \frac{2}{3}\phi^{3}
+ + \frac{1}{5}\phi^{5})(T - T_{m})
+    \end{equation}
+
+
+
+    \section{Methods}
+    Simulations were carried out in Python using the numpy numerical library for data structures and generic functions, and matplotlib for plotting.  Parallelism was employed by offloading plotting routines to additional threads, eliminating runtime overhead due to plotting. All sourcecode is attached seperately.
+
+    In part A, the system was of size 256x256, with a time step size of 1.0.  15,000 time steps were performed, with plots made every 1000 time steps. Initial values were set to 0.5 and 0.25 $\pm$ a small noise term. The average domain size was calculated according to the algorithm given in the assignment (domain algorithm), fitting to a single term power law function:
+
+    \begin{equation} \label{fit}
+        f_{fit} = A*L(t)^{n}
+    \end{equation}
+
+    In part B, ten order parameters were used.  $\kappa$,L,dx, and dy were set to unity, with dt=0.1. 5000 time steps were performed, and auxilliary calculations executed every 100 time steps. The domain algorithm was modified by starting from the sum of squares before using an fft to perform the domain size calculation.  The result was squared to represent an area and plotted using a log scale to match the literature\cite{CHEN}.
+
+    \section{Results}
+        The fit parameters for the average domain size were:
+
+
+        \begin{tabular}[!htb]{|r|l|l|}
+            \hline
+            IC & A & n \\
+            \hline
+            0.5 & 7.41 & 0.179 \\
+            \hline
+            0.25 & 8.65 & 0.163 \\
+            \hline
+
+        \end{tabular}
+
+        \begin{figure}[!htb]
+            \label{fig:initial}
+            \centering
+            \includegraphics[width=0.4\textwidth]{chs-step0.png}
+            \caption{A representative Initial Condition.}
+        \end{figure}
+
+        \begin{figure}[!htb]
+            \label{fig:PartAevolution}
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{chs-step1000.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{chs-step4000.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{chs-step8000.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{chs-step12000.png}
+            }
+            \caption{Evolution of phase seperation in material. Time steps 1000, 4000, 8000, 12000.}
+        \end{figure}
+
+        \begin{figure}[!htb]
+            \label{fig:fit}
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{L-trend.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{L-trend-25.png}
+            }
+            \caption{Evolution of average domain size for initial conditions 0.5, 0.25.}
+        \end{figure}
+
+
+
+
+        \begin{figure}[!htb]
+            \label{fig:grain-growth}
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{op-step1000.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{op-step2000.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{op-step3000.png}
+            }
+            \subfigure[] {
+            \includegraphics[width=0.6\textwidth]{op-step4000.png}
+            }
+            \caption{Evolution of grain growth. Time steps 1000,2000,3000,4000.}
+        \end{figure}
+
+        \begin{figure}[!htb]
+            \label{fig:domain-size}
+            \centering
+            \includegraphics[width=0.8\textwidth]{sizeln.png}
+            \caption{Grain Size evolution. log(t) vs log(area).}
+        \end{figure}
+
+
+    \begin{thebibliography}{1}
+
+    \bibitem{CHEN}
+      Long-Qing CHen, Wei Yang,
+      \emph{Computer simulation of the domain dynamics of a quenched system with a large number of nonsonserved order parameters: The grain-growth kinetics},
+      Department of Materials Science and Engineering, Pennsylvania State University,
+      May 4, 1994.
+
+    \end{thebibliography}
+
+
+\end{document}

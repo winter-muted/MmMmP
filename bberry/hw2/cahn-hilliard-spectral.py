@@ -24,7 +24,7 @@ nxy = nx*ny
 nsteps = 15000
 plot_interval = 1000
 
-c = np.full(nxy,0.25)
+c = np.full(nxy,0.5)
 for i in range(nxy):
     a = np.random.rand()
     if a < .5:
@@ -75,38 +75,13 @@ def update_CH():
 
 
 def domain_size():
-        c0_FFT = np.fft.fft2(c - c0) / nxy
-        Sk = abs(c0_FFT) * abs(c0_FFT)
-        kx2 = sum(sum(KX*KX*Sk))/sum(sum(Sk))
-        ky2 = sum(sum(KY*KY*Sk))/sum(sum(Sk))
-        Lx = 2*(np.pi)/kx2**.5
-        Ly = 2*(np.pi)/ky2**.5
-        L.append((Lx + Ly) / 2)
-
-# Run function
-def CH_run():
-    for step in range(nsteps):
-        update_CH()
-
-        print "Finished step:" + str(step)
-        # plot on the given interval
-        if (step == 0) or (step % plot_interval == 0):
-            total_c.append(sum(sum(c)))
-
-            # my_plot(c,step)
-            try:
-                c_plot = copy.copy(c)
-                # c_plot = c
-                thread = Process(target=my_plot,args=(c_plot,step))
-                thread.start()
-
-                # my_plot(step)
-            except:
-                print "Could not create plot thread."
-
-
-            domain_size()
-
+    c0_FFT = np.fft.fft2(c - c0) / nxy
+    Sk = abs(c0_FFT) * abs(c0_FFT)
+    kx2 = sum(sum(KX*KX*Sk))/sum(sum(Sk))
+    ky2 = sum(sum(KY*KY*Sk))/sum(sum(Sk))
+    Lx = 2*(np.pi)/kx2**.5
+    Ly = 2*(np.pi)/ky2**.5
+    L.append((Lx + Ly) / 2)
 
 # Plotting routines
 def my_plot(c_plot,step):
@@ -117,6 +92,27 @@ def my_plot(c_plot,step):
     plt.savefig(filename)
     plt.clf()
 
+# Run function
+def CH_run():
+    for step in range(nsteps):
+        update_CH()
+
+        # print "Finished step:" + str(step)
+        # plot on the given interval
+        if (step == 0) or (step % plot_interval == 0):
+            total_c.append(sum(sum(c)))
+
+            #exception handling
+            try:
+                c_plot = copy.copy(c)
+                thread = Process(target=my_plot,args=(c_plot,step))
+                thread.start()
+            except:
+                print "Could not create plot thread."
+
+            domain_size()
+
+
 # Boilerplate
 def main():
     CH_run()
@@ -124,7 +120,7 @@ def main():
     # Currently has a problem. There should be a more pythonic way of doing
     # the animation.
     os.system('rm chs-animation.gif')
-    # os.system('convert -delay 100 -loop 0 chs-step* chs-animation.gif')
+    os.system('convert -delay 30 -loop 0 chs-step* chs-animation.gif')
     # os.system('rm chs-step*')
 
     # L(t) plot code
@@ -139,12 +135,14 @@ def main():
     y = fit_func(x,popt[0],popt[1])
     plt.plot(xdata,L,'ro',x,y,'b')
     plt.title('L(t)')
-    plt.text(10,max(y)-2,'A=' + str(popt[0]))
-    plt.text(10,max(y)-4,'n=' + str(popt[1]))
+    plt.text(20,max(y)-2,'A=' + str(popt[0]))
+    plt.text(20,max(y)-4,'n=' + str(popt[1]))
     plt.savefig("L-trend.png")
     plt.clf()
 
-    print total_c
+    # extra routines to plot total concentration evolution
+    # not investigated
+    # print total_c
     plt.plot(total_c)
     plt.savefig("c_evolution.png")
     plt.clf()

@@ -1,4 +1,4 @@
-\documentclass{report}
+\documentclass[11pt,twocolumn]{report}
 \usepackage{graphicx, subfigure}
 \usepackage{mathtools}
 \usepackage{hyperref}
@@ -16,7 +16,7 @@
 
 \begin{document}
 
-    \title{Phase Field Simulations}
+    \title{}
     \author{Bruce Berry}
     \maketitle
 
@@ -54,7 +54,46 @@
 
     \section{Results}
         \subsection{Copper Nanowire}
+        \begin{figure}
+            \label{fig:stress-small-fit}
+            \centering
+            \includegraphics[width=0.4\textwidth]{sigma33-small-fit.png}
+            \caption{Fit for 8x8x46 nanowire.}
+        \end{figure}
+        \begin{figure}
+            \label{fig:stress-large-fit}
+            \centering
+            \includegraphics[width=0.4\textwidth]{sigma33-large-fit.png}
+            \caption{Fit for 16x16x46 nanowire.}
+        \end{figure}
+        \begin{figure}
+            \label{fig:rawdata-small}
+            \centering
+            \includegraphics[width=0.4\textwidth]{StressvsSimulationStep-small.jpg}
+            \caption{Stress tensor for 8x8x16 nanowire. Step size is sim-step*5.}
+        \end{figure}
+        \begin{figure}
+            \label{fig:rawdata-large}
+            \centering
+            \includegraphics[width=0.4\textwidth]{StressvsSimulationStep-large.jpg}
+            \caption{Stress tensor for 16x16x36 nanowire.Step size is sim-step*5.}
+        \end{figure}
+        \begin{figure}
+            \label{fig:evolution}
+            \centering
+            \includegraphics[width=0.6\textwidth]{evolution.png}
+            \caption{Stretching evolution of 8x8x36 nanowire.}
+        \end{figure}
+        % \begin{figure}
+        %     \label{fig:correction}
+        %     \centering
+        %     \includegraphics[width=0.6\textwidth]{correction.png}
+        %     \caption{Correction factors to relate bulk modulus with MD results.}
+        % \end{figure}
 
+        The raw results of the stress tensor are given in ~\ref{fig:rawdata-small} and ~\ref{fig:rawdata-large} for each cross section tested.  The value of interest is the Young's modulus in the direction of displacement.  To obtain this value, the data is taken for $\epsilon_{zz}$ vs $\sigma_{zz}$ over the linear elastic range.  The linear elastic range was visually determined to be the first 5250 and 6750 time steps for the small and large cross sections, respectively.  The Young's Modulus is the slope of the elastic range. Time step (x) is converted to strain, and simulation stress is modified according to 1 (eV/$\AA^3$) = 160 GPa. ~\ref{fig:stress-small-fit} and ~\ref{fig:stress-large-fit} show the fit and Young's Modulus for each case.  We find that the Youngs module is not strongly sensitive to changes in wire aspect ratio, as a doubling of the aspect ratio results in a 20% increase in E.  It is of interest to compare this value to that of a macroscopic sample, where $E_{bulk}$ = 117 GPa.  According to ~\ref{paper:size-dependent}, the MD calculated Young's Modulus can be compared to the bulk value by considering the thickness of the nanowire.  For the small case, the correction factor ~.7 results in a true E = 58.9GPa, leaving a significant discrepancy.
+
+        ~\ref{fig:evolution} shows the behavior of the wire up until fracture. The wire initially carries the strain induced stress without any dislocations in (a).  In (b), the very first visibile dislocations occurs near the center of the wire. (c) begins to show significant narrowing of the central section of the wire, with buldges propogating towards the ends.   By (d), significant disorder has arisen and out of plan bending is apparent.  (e) exhibits progressive necking of the point of eventual failure, with (f) showing the fracture state and subsequent reduction of stress.  The linear elastic region persists until some point between (c) and (d), when the total bonded cross-sectional area begins to decrease and necking comences.  $\sigma_{z}$ decreases as necking proceeds until reaching approximately zero at fracture.
 
 
         \subsection{Collagen Stretching}

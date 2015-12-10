@@ -10,6 +10,7 @@ def fit_func(x,A,B):
 
 
 filename = 'sigma33-small.txt'
+outfile = 'sigma33-small-fit.png'
 strain_rate = .0001538*2 # .02 / 130 angstroms, engineering strain
 energy_factor = 160.2 # eV/ang^3 to GPA
 # strain_rate = 0
@@ -40,5 +41,5 @@ plt.ylabel('sigma-zz (Pa)')
 line1 = plt.plot(strain_x,data['y']*energy_factor)
 line2 = plt.plot(strain_x[0:elastic_range],fit_data,fit_x,fit_y)
 plt.legend(['Data','E=%f' %E])
-plt.show()
-plt.savefig('sigma33-small-fit.png')
+# plt.show()
+plt.savefig(outfile)
